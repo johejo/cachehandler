@@ -4,7 +4,7 @@ Package cachehandler provides net/http middleware that caches HTTP responses.
 
 Inspired by go-chi/stampede. https://github.com/go-chi/stampede
 
-The HTTP response is stored in the LRU cache and calls to handlers with the same key are merged.
+The HTTP response is stored in the cache and calls to handlers with the same key are merged.
 
 [![ci](https://github.com/johejo/cachehandler/workflows/ci/badge.svg?branch=main)](https://github.com/johejo/cachehandler/actions?query=workflow%3Aci)
 [![Go Reference](https://pkg.go.dev/badge/github.com/johejo/cachehandler.svg)](https://pkg.go.dev/github.com/johejo/cachehandler)
