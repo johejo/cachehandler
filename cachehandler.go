@@ -86,34 +86,33 @@ func (m *Middleware) Wrap(next http.Handler) http.Handler {
 		)
 		buf := m.pool.Get().(*bytes.Buffer)
 		defer m.pool.Put(buf)
-		hooks := httpsnoop.Hooks{
-			WriteHeader: func(whf httpsnoop.WriteHeaderFunc) httpsnoop.WriteHeaderFunc {
-				return func(code int) {
-					whf(code)
-					if !wroteHeader {
-						status = code
-						wroteHeader = true
-					}
-				}
-			},
-			Write: func(wf httpsnoop.WriteFunc) httpsnoop.WriteFunc {
-				return func(b []byte) (int, error) {
-					n, err := wf(b)
-					buf.Write(b)
-					return n, err
-				}
-			},
-			Header: func(hf httpsnoop.HeaderFunc) httpsnoop.HeaderFunc {
-				return func() http.Header {
-					h := hf()
-					header = h
-					return h
-				}
-			},
-		}
 
 		m.group.Do(key, func() (interface{}, error) {
-			next.ServeHTTP(httpsnoop.Wrap(w, hooks), r)
+			next.ServeHTTP(httpsnoop.Wrap(w, httpsnoop.Hooks{
+				WriteHeader: func(whf httpsnoop.WriteHeaderFunc) httpsnoop.WriteHeaderFunc {
+					return func(code int) {
+						whf(code)
+						if !wroteHeader {
+							status = code
+							wroteHeader = true
+						}
+					}
+				},
+				Write: func(wf httpsnoop.WriteFunc) httpsnoop.WriteFunc {
+					return func(b []byte) (int, error) {
+						n, err := wf(b)
+						buf.Write(b)
+						return n, err
+					}
+				},
+				Header: func(hf httpsnoop.HeaderFunc) httpsnoop.HeaderFunc {
+					return func() http.Header {
+						h := hf()
+						header = h
+						return h
+					}
+				},
+			}), r)
 			return nil, nil
 		})
 
